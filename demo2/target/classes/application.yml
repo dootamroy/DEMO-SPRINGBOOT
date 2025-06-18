@@ -9,9 +9,14 @@ spring:
     password: ROCKETMAN123
     driver-class-name: org.postgresql.Driver
 eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: demo2-service
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 10
   client:
     serviceUrl:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka/}
-  instance:
-    prefer-ip-address: true
-    hostname: demo2-service 
+    registryFetchIntervalSeconds: 5
+    instanceInfoReplicationIntervalSeconds: 5
+    initialInstanceInfoReplicationIntervalSeconds: 5 
