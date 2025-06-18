@@ -1,0 +1,80 @@
+services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    volumes:
+      - ./tailscale:/var/lib/tailscale
+    environment:
+      - TS_AUTHKEY=${TAILSCALE_AUTH_KEY}
+      - TS_HOSTNAME=docker-tailscale
+      - TS_STATE_DIR=/var/lib/tailscale
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      - spring-net
+      - tailscale-net
+
+  eureka-server:
+    image: eureka-server:latest
+    build: 
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    networks:
+      - spring-net
+      - tailscale-net
+    depends_on:
+      - tailscale
+
+  demo1-service:
+    image: demo1-service:latest
+    build: 
+      context: ./demo1
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    volumes:
+      - demo1_logs:/app/logs
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://100.75.215.139:5432/dootam_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=ROCKETMAN123
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_JPA_SHOW_SQL=true
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - spring-net
+      - tailscale-net
+    depends_on:
+      - eureka-server
+      - tailscale
+
+  demo2-service:
+    image: demo2-service:latest
+    build: 
+      context: ./demo2
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    volumes:
+      - demo2_logs:/app/logs
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - spring-net
+      - tailscale-net
+    depends_on:
+      - eureka-server
+      - tailscale
+
+networks:
+  spring-net:
+    driver: bridge
+  tailscale-net:
+    driver: bridge
+
+volumes:
+  demo1_logs:
+  demo2_logs: 

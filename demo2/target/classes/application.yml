@@ -1,0 +1,17 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: demo2-service
+  datasource:
+    url: jdbc:postgresql://100.75.215.139:5432/dootam_db
+    username: postgres
+    password: ROCKETMAN123
+    driver-class-name: org.postgresql.Driver
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+    hostname: demo2-service 
