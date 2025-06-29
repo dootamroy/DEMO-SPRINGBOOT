@@ -1,6 +1,8 @@
 D:\Onedrive\Documents\GitHub\DEMO SPRINGBOOT\demo1\src\main\java\com\example\demo1\entity\User.java
 D:\Onedrive\Documents\GitHub\DEMO SPRINGBOOT\demo1\src\main\java\com\example\demo1\repository\UserRepository.java
 D:\Onedrive\Documents\GitHub\DEMO SPRINGBOOT\demo1\src\main\java\com\example\demo1\service\UserService.java
+D:\Onedrive\Documents\GitHub\DEMO SPRINGBOOT\demo1\src\main\java\com\example\demo1\config\DataSourceConfig.java
+D:\Onedrive\Documents\GitHub\DEMO SPRINGBOOT\demo1\src\main\java\com\example\demo1\config\RepositoryConfig.java
 D:\Onedrive\Documents\GitHub\DEMO SPRINGBOOT\demo1\src\main\java\com\example\demo1\controller\UserController.java
 D:\Onedrive\Documents\GitHub\DEMO SPRINGBOOT\demo1\src\main\java\com\example\demo1\Demo1Application.java
 D:\Onedrive\Documents\GitHub\DEMO SPRINGBOOT\demo1\src\main\java\com\example\demo1\controller\HelloController.java

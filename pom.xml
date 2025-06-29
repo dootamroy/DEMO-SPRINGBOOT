@@ -34,6 +34,16 @@
         <module>demo2</module>
     </modules>
 
+    <!-- Common dependencies shared across all modules -->
+    <dependencies>
+        <!-- Spring Boot Starter Test - common for all modules -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

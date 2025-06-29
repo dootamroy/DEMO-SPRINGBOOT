@@ -1,17 +1,26 @@
 @echo off
-echo Building Eureka Server...
-cd eureka-server
-call mvn clean package -DskipTests
-cd ..
+echo Building all Spring Boot microservices...
+echo.
 
-echo Building Demo1 Service...
-cd demo1
+echo Starting multi-module build...
 call mvn clean package -DskipTests
-cd ..
 
-echo Building Demo2 Service...
-cd demo2
-call mvn clean package -DskipTests
-cd ..
-
-echo All services built successfully! 
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo ========================================
+    echo All services built successfully!
+    echo ========================================
+    echo.
+    echo Built modules:
+    echo - eureka-server
+    echo - demo1
+    echo - demo2
+    echo.
+    echo JAR files are ready in target/ directories
+) else (
+    echo.
+    echo ========================================
+    echo Build failed! Check the error messages above.
+    echo ========================================
+    pause
+) 

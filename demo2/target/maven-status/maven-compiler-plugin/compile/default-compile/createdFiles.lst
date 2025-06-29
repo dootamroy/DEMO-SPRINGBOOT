@@ -1,3 +1,4 @@
 com\example\demo2\controller\HelloController.class
+com\example\demo2\config\DataSourceConfig.class
 com\example\demo2\config\RestTemplateConfig.class
 com\example\demo2\Demo2Application.class

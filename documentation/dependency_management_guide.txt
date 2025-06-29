@@ -1,0 +1,300 @@
+DEPENDENCY MANAGEMENT GUIDE FOR MULTI-MODULE MAVEN PROJECT
+==========================================================
+
+This guide explains how to add dependencies to individual services in your Spring Boot microservices project.
+
+PROJECT STRUCTURE
+-----------------
+- pom.xml (Parent POM - manages common dependencies)
+- eureka-server/pom.xml (Eureka Server dependencies)
+- demo1/pom.xml (Demo1 Service dependencies)
+- demo2/pom.xml (Demo2 Service dependencies)
+
+1. ADDING DEPENDENCIES TO A SINGLE SERVICE
+==========================================
+
+Method 1: Add to Individual Module POM (Recommended)
+---------------------------------------------------
+
+Step 1: Open the service's pom.xml file
+Example: To add dependency to demo1 service, edit `demo1/pom.xml`
+
+Step 2: Add the dependency in the <dependencies> section
+```xml
+<dependencies>
+    <!-- Existing dependencies -->
+    
+    <!-- New dependency -->
+    <dependency>
+        <groupId>com.example</groupId>
+        <artifactId>example-library</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+</dependencies>
+```
+
+Step 3: Build the specific service
+```bash
+# Build only demo1 service
+cd demo1
+mvn clean package
+
+# Or build from root (will build all, but only demo1 will have the new dependency)
+mvn clean package
+```
+
+2. COMMON DEPENDENCY EXAMPLES
+=============================
+
+Spring Boot Starters
+-------------------
+```xml
+<!-- Web Services -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<!-- Security -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+
+<!-- Actuator (Monitoring) -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+<!-- Validation -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+```
+
+Database Dependencies
+--------------------
+```xml
+<!-- MySQL -->
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <scope>runtime</scope>
+</dependency>
+
+<!-- MongoDB -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-mongodb</artifactId>
+</dependency>
+
+<!-- Redis -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+Utility Libraries
+----------------
+```xml
+<!-- Apache Commons -->
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+</dependency>
+
+<!-- Jackson (JSON) -->
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+</dependency>
+
+<!-- Lombok (Reduces boilerplate) -->
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <optional>true</optional>
+</dependency>
+```
+
+3. DEPENDENCY SCOPES
+====================
+
+Common Scopes:
+--------------
+- **compile** (default): Available at compile time and runtime
+- **runtime**: Only available at runtime
+- **test**: Only available during testing
+- **provided**: Provided by the container (e.g., servlet-api)
+
+Example:
+```xml
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>  <!-- Only needed at runtime -->
+</dependency>
+```
+
+4. VERSION MANAGEMENT
+====================
+
+Option 1: Specify version in module POM
+---------------------------------------
+```xml
+<dependency>
+    <groupId>com.example</groupId>
+    <artifactId>example-library</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+Option 2: Define version in parent POM (Recommended for common dependencies)
+---------------------------------------------------------------------------
+In parent `pom.xml`:
+```xml
+<properties>
+    <jackson.version>2.15.0</jackson.version>
+</properties>
+
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+Then in module POM:
+```xml
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <!-- Version is inherited from parent -->
+</dependency>
+```
+
+5. BUILDING AFTER ADDING DEPENDENCIES
+=====================================
+
+Single Service Build:
+--------------------
+```bash
+# Build only the specific service
+cd demo1
+mvn clean package
+
+# Or build from root directory
+mvn clean package -pl demo1
+```
+
+Full Project Build:
+------------------
+```bash
+# Build all services (recommended)
+mvn clean package
+
+# Or use the batch file
+build-all.bat
+```
+
+6. TROUBLESHOOTING
+==================
+
+Common Issues:
+--------------
+
+1. **Dependency not found**
+   - Check if the dependency exists in Maven Central
+   - Verify the groupId, artifactId, and version
+   - Try running `mvn dependency:resolve`
+
+2. **Version conflicts**
+   - Use `mvn dependency:tree` to see dependency tree
+   - Exclude conflicting dependencies if needed
+
+3. **Build fails after adding dependency**
+   - Check for compilation errors
+   - Verify the dependency is compatible with your Spring Boot version
+
+Useful Commands:
+----------------
+```bash
+# View dependency tree
+mvn dependency:tree
+
+# Download dependencies without building
+mvn dependency:resolve
+
+# Check for dependency conflicts
+mvn dependency:analyze
+
+# Clean and rebuild
+mvn clean package
+```
+
+7. BEST PRACTICES
+=================
+
+1. **Use Spring Boot Starters when possible**
+   - They handle version compatibility automatically
+   - Example: `spring-boot-starter-web` instead of individual servlet dependencies
+
+2. **Keep versions in parent POM**
+   - Centralize version management
+   - Ensures consistency across modules
+
+3. **Use appropriate scopes**
+   - Use `runtime` for database drivers
+   - Use `test` for testing libraries
+
+4. **Document dependencies**
+   - Add comments explaining why a dependency is needed
+   - Keep dependencies minimal
+
+5. **Regular dependency updates**
+   - Update dependencies regularly for security patches
+   - Test thoroughly after updates
+
+8. EXAMPLE: ADDING A NEW DEPENDENCY TO DEMO1
+============================================
+
+Let's say you want to add Apache Commons Lang to demo1 service:
+
+1. **Edit demo1/pom.xml**
+```xml
+<dependencies>
+    <!-- Existing dependencies -->
+    
+    <!-- Apache Commons Lang for utility functions -->
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+    </dependency>
+</dependencies>
+```
+
+2. **Build the service**
+```bash
+mvn clean package -pl demo1
+```
+
+3. **Use in your code**
+```java
+import org.apache.commons.lang3.StringUtils;
+
+@Service
+public class UserService {
+    public String processName(String name) {
+        return StringUtils.capitalize(name);
+    }
+}
+```
+
+This approach ensures that only the demo1 service has the Apache Commons dependency, while other services remain unaffected. 
