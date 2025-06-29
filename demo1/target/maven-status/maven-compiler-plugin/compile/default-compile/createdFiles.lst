@@ -3,6 +3,7 @@ com\example\demo1\entity\User.class
 com\example\demo1\config\DataSourceConfig.class
 com\example\demo1\controller\UserController.class
 com\example\demo1\service\UserService.class
+com\example\demo1\config\JacksonConfig.class
 com\example\demo1\repository\UserRepository.class
 com\example\demo1\config\RepositoryConfig.class
 com\example\demo1\Demo1Application.class
