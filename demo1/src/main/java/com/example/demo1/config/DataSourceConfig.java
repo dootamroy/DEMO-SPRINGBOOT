@@ -1,7 +1,7 @@
 package com.example.demo1.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,17 +18,49 @@ import java.util.Properties;
 @Configuration
 public class DataSourceConfig {
 
+    @Value("${spring.datasource.url}")
+    private String renderJdbcUrl;
+
+    @Value("${spring.datasource.username}")
+    private String renderUsername;
+
+    @Value("${spring.datasource.password}")
+    private String renderPassword;
+
+    @Value("${spring.datasource.driver-class-name}")
+    private String renderDriverClassName;
+
+    @Value("${supabase.datasource.url}")
+    private String supabaseJdbcUrl;
+
+    @Value("${supabase.datasource.username}")
+    private String supabaseUsername;
+
+    @Value("${supabase.datasource.password}")
+    private String supabasePassword;
+
+    @Value("${supabase.datasource.driver-class-name}")
+    private String supabaseDriverClassName;
+
     @Primary
     @Bean(name = "renderDataSource")
-    @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource renderDataSource() {
-        return DataSourceBuilder.create().build();
+        return DataSourceBuilder.create()
+                .url(renderJdbcUrl)
+                .username(renderUsername)
+                .password(renderPassword)
+                .driverClassName(renderDriverClassName)
+                .build();
     }
 
     @Bean(name = "supabaseDataSource")
-    @ConfigurationProperties(prefix = "supabase.datasource")
     public DataSource supabaseDataSource() {
-        return DataSourceBuilder.create().build();
+        return DataSourceBuilder.create()
+                .url(supabaseJdbcUrl)
+                .username(supabaseUsername)
+                .password(supabasePassword)
+                .driverClassName(supabaseDriverClassName)
+                .build();
     }
 
     @Primary
