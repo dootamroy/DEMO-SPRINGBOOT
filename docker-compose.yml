@@ -1,31 +1,16 @@
 services:
-  tailscale:
-    image: tailscale/tailscale:latest
-    volumes:
-      - ./tailscale:/var/lib/tailscale
-    environment:
-      - TS_AUTHKEY=${TAILSCALE_AUTH_KEY}
-      - TS_HOSTNAME=docker-tailscale
-      - TS_STATE_DIR=/var/lib/tailscale
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    networks:
-      - spring-net
-      - tailscale-net
-
   eureka-server:
     image: eureka-server:latest
     build: 
       context: ./eureka-server
       dockerfile: Dockerfile
     ports:
-      - "8761:8761"
+      - "${EUREKA_SERVER_PORT:-8761}:${EUREKA_SERVER_PORT:-8761}"
+    environment:
+      - EUREKA_SERVER_PORT=${EUREKA_SERVER_PORT:-8761}
+      - EUREKA_SERVER_HOST=${EUREKA_SERVER_HOST:-eureka-server}
     networks:
       - spring-net
-      - tailscale-net
-    depends_on:
-      - tailscale
 
   demo1-service:
     image: demo1-service:latest
@@ -33,23 +18,34 @@ services:
       context: ./demo1
       dockerfile: Dockerfile
     ports:
-      - "8081:8081"
+      - "${DEMO1_SERVICE_PORT:-8081}:${DEMO1_SERVICE_PORT:-8081}"
     volumes:
       - demo1_logs:/app/logs
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://100.75.215.139:5432/dootam_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=ROCKETMAN123
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
-      - SPRING_JPA_SHOW_SQL=true
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # Database Configuration
+      - DB_HOST=${DB_HOST:-100.75.215.139}
+      - DB_PORT=${DB_PORT:-5432}
+      - DEMO1_DB_NAME=${DEMO1_DB_NAME:-demo1_db}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-ROCKETMAN123}
+      - DEMO1_DATASOURCE_URL=${DEMO1_DATASOURCE_URL:-jdbc:postgresql://${DB_HOST:-100.75.215.139}:${DB_PORT:-5432}/${DEMO1_DB_NAME:-demo1_db}}
+      
+      # JPA Configuration
+      - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.PostgreSQLDialect}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO:-none}
+      - SPRING_JPA_SHOW_SQL=${SPRING_JPA_SHOW_SQL:-true}
+      
+      # Eureka Configuration
+      - EUREKA_SERVER_HOST=${EUREKA_SERVER_HOST:-eureka-server}
+      - EUREKA_SERVER_PORT=${EUREKA_SERVER_PORT:-8761}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:-http://${EUREKA_SERVER_HOST:-eureka-server}:${EUREKA_SERVER_PORT:-8761}/eureka/}
+      
+      # Service Configuration
+      - DEMO1_SERVICE_PORT=${DEMO1_SERVICE_PORT:-8081}
     networks:
       - spring-net
-      - tailscale-net
     depends_on:
       - eureka-server
-      - tailscale
 
   demo2-service:
     image: demo2-service:latest
@@ -57,24 +53,39 @@ services:
       context: ./demo2
       dockerfile: Dockerfile
     ports:
-      - "8082:8082"
+      - "${DEMO2_SERVICE_PORT:-8082}:${DEMO2_SERVICE_PORT:-8082}"
     volumes:
       - demo2_logs:/app/logs
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # Database Configuration
+      - DB_HOST=${DB_HOST:-100.75.215.139}
+      - DB_PORT=${DB_PORT:-5432}
+      - DEMO2_DB_NAME=${DEMO2_DB_NAME:-demo2_db}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-ROCKETMAN123}
+      - DEMO2_DATASOURCE_URL=${DEMO2_DATASOURCE_URL:-jdbc:postgresql://${DB_HOST:-100.75.215.139}:${DB_PORT:-5432}/${DEMO2_DB_NAME:-demo2_db}}
+      
+      # JPA Configuration
+      - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.PostgreSQLDialect}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO:-none}
+      - SPRING_JPA_SHOW_SQL=${SPRING_JPA_SHOW_SQL:-true}
+      
+      # Eureka Configuration
+      - EUREKA_SERVER_HOST=${EUREKA_SERVER_HOST:-eureka-server}
+      - EUREKA_SERVER_PORT=${EUREKA_SERVER_PORT:-8761}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:-http://${EUREKA_SERVER_HOST:-eureka-server}:${EUREKA_SERVER_PORT:-8761}/eureka/}
+      
+      # Service Configuration
+      - DEMO2_SERVICE_PORT=${DEMO2_SERVICE_PORT:-8082}
     networks:
       - spring-net
-      - tailscale-net
     depends_on:
       - eureka-server
-      - tailscale
 
 networks:
   spring-net:
     driver: bridge
-  tailscale-net:
-    driver: bridge
 
 volumes:
   demo1_logs:
-  demo2_logs: 
+  demo2_logs:
