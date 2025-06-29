@@ -1,3 +1,5 @@
+[![Java CI with Maven](https://github.com/dootamroy/DEMO-SPRINGBOOT/actions/workflows/maven.yml/badge.svg)](https://github.com/dootamroy/DEMO-SPRINGBOOT/actions/workflows/maven.yml)
+
 # DEMO-SPRINGBOOT
 
 ## Tech Stack Used
