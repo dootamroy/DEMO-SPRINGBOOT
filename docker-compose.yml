@@ -22,13 +22,21 @@ services:
     volumes:
       - demo1_logs:/app/logs
     environment:
-      # Database Configuration
+      # Render Database Configuration
       - DB_HOST=${DB_HOST:-100.75.215.139}
       - DB_PORT=${DB_PORT:-5432}
       - DEMO1_DB_NAME=${DEMO1_DB_NAME:-demo1_db}
       - DB_USERNAME=${DB_USERNAME:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-ROCKETMAN123}
       - DEMO1_DATASOURCE_URL=${DEMO1_DATASOURCE_URL:-jdbc:postgresql://${DB_HOST:-100.75.215.139}:${DB_PORT:-5432}/${DEMO1_DB_NAME:-demo1_db}}
+      
+      # Supabase Database Configuration
+      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST:-aws-0-ap-south-1.pooler.supabase.com}
+      - SUPABASE_DB_PORT=${SUPABASE_DB_PORT:-5432}
+      - SUPABASE_DB_NAME=${SUPABASE_DB_NAME:-postgres}
+      - SUPABASE_DB_USERNAME=${SUPABASE_DB_USERNAME:-postgres.yseolfesfpymybqrgmpn}
+      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD:-Rocketman@123}
+      - DEMO1_SUPABASE_DATASOURCE_URL=${DEMO1_SUPABASE_DATASOURCE_URL:-jdbc:postgresql://${SUPABASE_DB_HOST:-aws-0-ap-south-1.pooler.supabase.com}:${SUPABASE_DB_PORT:-5432}/${SUPABASE_DB_NAME:-postgres}}
       
       # JPA Configuration
       - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.PostgreSQLDialect}
@@ -57,13 +65,21 @@ services:
     volumes:
       - demo2_logs:/app/logs
     environment:
-      # Database Configuration
+      # Render Database Configuration
       - DB_HOST=${DB_HOST:-100.75.215.139}
       - DB_PORT=${DB_PORT:-5432}
       - DEMO2_DB_NAME=${DEMO2_DB_NAME:-demo2_db}
       - DB_USERNAME=${DB_USERNAME:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-ROCKETMAN123}
       - DEMO2_DATASOURCE_URL=${DEMO2_DATASOURCE_URL:-jdbc:postgresql://${DB_HOST:-100.75.215.139}:${DB_PORT:-5432}/${DEMO2_DB_NAME:-demo2_db}}
+      
+      # Supabase Database Configuration
+      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST:-aws-0-ap-south-1.pooler.supabase.com}
+      - SUPABASE_DB_PORT=${SUPABASE_DB_PORT:-5432}
+      - SUPABASE_DB_NAME=${SUPABASE_DB_NAME:-postgres}
+      - SUPABASE_DB_USERNAME=${SUPABASE_DB_USERNAME:-postgres.yseolfesfpymybqrgmpn}
+      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD:-Rocketman@123}
+      - DEMO2_SUPABASE_DATASOURCE_URL=${DEMO2_SUPABASE_DATASOURCE_URL:-jdbc:postgresql://${SUPABASE_DB_HOST:-aws-0-ap-south-1.pooler.supabase.com}:${SUPABASE_DB_PORT:-5432}/${SUPABASE_DB_NAME:-postgres}}
       
       # JPA Configuration
       - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.PostgreSQLDialect}

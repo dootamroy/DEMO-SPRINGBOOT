@@ -21,7 +21,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, transactionManager = "renderTransactionManager")
     public Page<User> getAllUsers(int page, int size) {
         // Ensure size is within reasonable limits
         int pageSize = Math.min(size, DEFAULT_PAGE_SIZE);
@@ -32,7 +32,7 @@ public class UserService {
         return userRepository.findAll(pageable);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, transactionManager = "renderTransactionManager")
     public long getTotalUsers() {
         return userRepository.count();
     }
