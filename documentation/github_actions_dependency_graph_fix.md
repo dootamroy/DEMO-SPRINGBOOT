@@ -15,22 +15,11 @@ Error: Response body: {
 
 ## Root Cause
 
-The workflow lacked the necessary permissions to access GitHub's dependency graph API. The `advanced-security/maven-dependency-submission-action` requires explicit permissions to submit dependency snapshots.
+The workflow was using an outdated version of the dependency submission action and potentially had permission issues. The `advanced-security/maven-dependency-submission-action` requires proper configuration to submit dependency snapshots.
 
 ## Solution Applied
 
-### 1. Added Required Permissions
-
-Added the following permissions section to the workflow:
-
-```yaml
-# Add permissions for dependency graph access
-permissions:
-  contents: read
-  dependency-graph: write
-```
-
-### 2. Updated Action Version
+### 1. Updated Action Version
 
 Changed from a specific commit hash to a stable version:
 
@@ -42,6 +31,10 @@ uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e
 uses: advanced-security/maven-dependency-submission-action@v1
 ```
 
+### 2. Removed Invalid Permissions
+
+The explicit permissions section was removed as it contained invalid permission names and the default GitHub Actions permissions are sufficient for dependency graph submission.
+
 ## Complete Fixed Workflow
 
 ```yaml
@@ -52,11 +45,6 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
-# Add permissions for dependency graph access
-permissions:
-  contents: read
-  dependency-graph: write
 
 jobs:
   build:
@@ -78,16 +66,19 @@ jobs:
       uses: advanced-security/maven-dependency-submission-action@v1
 ```
 
-## Permission Details
+## Why This Works
 
-### `contents: read`
-- Allows the workflow to read repository contents
-- Required for accessing source code and build files
+### Default Permissions
+GitHub Actions provides default permissions that are sufficient for most operations including dependency graph submission:
+- `contents: read` - Allows reading repository contents
+- `metadata: read` - Allows reading repository metadata
+- `pull-requests: write` - Allows commenting on pull requests
 
-### `dependency-graph: write`
-- Allows the workflow to submit dependency snapshots
-- Required for the dependency submission action to work
-- Enables Dependabot security alerts and dependency insights
+### Action Version
+Using `@v1` instead of a commit hash ensures:
+- Stable, tested version of the action
+- Better compatibility with GitHub's API
+- Automatic bug fixes and improvements
 
 ## Benefits of Dependency Graph
 
@@ -98,7 +89,7 @@ jobs:
 
 ## Alternative Solutions
 
-If you don't need dependency graph functionality, you can:
+If you still encounter issues, you can:
 
 ### Option 1: Remove the dependency graph step entirely
 ```yaml
@@ -114,13 +105,21 @@ If you don't need dependency graph functionality, you can:
   uses: advanced-security/maven-dependency-submission-action@v1
 ```
 
+### Option 3: Use explicit permissions (if needed)
+```yaml
+permissions:
+  contents: read
+  security-events: write
+```
+
 ## Troubleshooting
 
 ### Common Issues
 
-1. **403 Forbidden**: Missing `dependency-graph: write` permission
+1. **403 Forbidden**: Usually resolved by updating action version
 2. **401 Unauthorized**: Repository doesn't have dependency graph enabled
 3. **Action not found**: Invalid action version or repository
+4. **Invalid workflow**: Incorrect YAML syntax or invalid permissions
 
 ### Verification Steps
 
@@ -128,9 +127,9 @@ If you don't need dependency graph functionality, you can:
    - Go to Settings → Security & analysis
    - Ensure "Dependency graph" is enabled
 
-2. Verify workflow permissions:
-   - Check that `permissions` section is present
-   - Ensure `dependency-graph: write` is included
+2. Verify workflow syntax:
+   - Check that YAML is valid
+   - Ensure no invalid permission names
 
 3. Test the workflow:
    - Push a change to trigger the workflow
@@ -139,9 +138,9 @@ If you don't need dependency graph functionality, you can:
 ## Best Practices
 
 1. **Use Stable Versions**: Prefer `@v1` over commit hashes for actions
-2. **Minimal Permissions**: Only grant necessary permissions
+2. **Minimal Configuration**: Start with default permissions
 3. **Error Handling**: Consider making dependency graph optional
-4. **Documentation**: Document why permissions are needed
+4. **Documentation**: Document why the action is needed
 
 ## Related Documentation
 
@@ -151,6 +150,6 @@ If you don't need dependency graph functionality, you can:
 
 ## Security Considerations
 
-- The `dependency-graph: write` permission only allows submitting dependency data
+- The dependency submission action only submits dependency data
 - It cannot read or modify repository contents beyond dependency information
-- This is a safe permission to grant for CI/CD workflows 
+- Default permissions are safe and follow the principle of least privilege 

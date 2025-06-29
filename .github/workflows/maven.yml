@@ -14,11 +14,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-# Add permissions for dependency graph access
-permissions:
-  contents: read
-  dependency-graph: write
-
 jobs:
   build:
 
