@@ -1,0 +1,246 @@
+EUREKA CONFIGURATIONS DOCUMENTATION
+====================================
+
+This document explains all Eureka configurations used in the Spring Boot microservices project.
+
+PROJECT STRUCTURE
+-----------------
+- eureka-server: Service discovery server (Port: 8761)
+- demo1-service: Microservice 1 (Port: 8081)
+- demo2-service: Microservice 2 (Port: 8082)
+
+1. EUREKA SERVER CONFIGURATION
+==============================
+
+File: eureka-server/src/main/resources/application.yml
+
+Configuration Details:
+---------------------
+server:
+  port: ${EUREKA_SERVER_PORT:8761}
+  # Default port 8761, configurable via environment variable
+
+spring:
+  application:
+    name: eureka-server
+    # Application name for service identification
+
+eureka:
+  instance:
+    hostname: ${EUREKA_SERVER_HOST:eureka-server}
+    # Hostname for the Eureka server instance
+    # Default: eureka-server, configurable via environment variable
+    prefer-ip-address: true
+    # Use IP address instead of hostname for service registration
+    # This helps with Docker container communication
+
+  client:
+    registerWithEureka: false
+    # Eureka server should not register itself as a client
+    fetchRegistry: false
+    # Eureka server should not fetch registry information
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+      # Self-referencing URL for the Eureka server
+      # Uses the configured hostname and port
+
+  server:
+    waitTimeInMsWhenSyncEmpty: 0
+    # Time to wait when sync is empty (0 = no wait)
+    enableSelfPreservation: false
+    # Disable self-preservation mode for development
+    evictionIntervalTimerInMs: 1000
+    # Interval for evicting expired instances (1 second)
+    renewalPercentThreshold: 0.85
+    # Threshold for renewal percentage (85%)
+    peerEurekaNodesUpdateIntervalMs: 1000
+    # Interval for updating peer Eureka nodes (1 second)
+
+2. EUREKA CLIENT CONFIGURATIONS
+===============================
+
+Both demo1-service and demo2-service use similar Eureka client configurations.
+
+File: demo1/src/main/resources/application.yml
+File: demo2/src/main/resources/application.yml
+
+Configuration Details:
+---------------------
+eureka:
+  instance:
+    prefer-ip-address: true
+    # Use IP address instead of hostname for service registration
+    # Essential for Docker container communication
+    hostname: demo1-service (or demo2-service)
+    # Service-specific hostname for identification
+    leaseRenewalIntervalInSeconds: 5
+    # How often the client sends heartbeat to Eureka server (5 seconds)
+    leaseExpirationDurationInSeconds: 10
+    # How long Eureka server waits before removing instance (10 seconds)
+
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://${EUREKA_SERVER_HOST:eureka-server}:${EUREKA_SERVER_PORT:8761}/eureka/}
+      # URL to connect to Eureka server
+      # Configurable via environment variables with fallbacks
+    registryFetchIntervalSeconds: 5
+    # How often client fetches registry from Eureka server (5 seconds)
+    instanceInfoReplicationIntervalSeconds: 5
+    # How often client replicates instance info to Eureka server (5 seconds)
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    # Initial delay before first replication (5 seconds)
+
+3. ENVIRONMENT VARIABLES
+========================
+
+Environment variables used for Eureka configuration:
+
+EUREKA_SERVER_PORT=8761
+- Port for Eureka server
+- Default: 8761
+
+EUREKA_SERVER_HOST=eureka-server
+- Hostname for Eureka server
+- Default: eureka-server
+
+EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+- Complete URL for clients to connect to Eureka server
+- Default: http://eureka-server:8761/eureka/
+
+4. DOCKER COMPOSE CONFIGURATION
+===============================
+
+File: docker-compose.yml
+
+Eureka Server Service:
+---------------------
+eureka-server:
+  environment:
+    - EUREKA_SERVER_PORT=${EUREKA_SERVER_PORT:-8761}
+    - EUREKA_SERVER_HOST=${EUREKA_SERVER_HOST:-eureka-server}
+  ports:
+    - "${EUREKA_SERVER_PORT:-8761}:${EUREKA_SERVER_PORT:-8761}"
+
+Client Services (demo1 & demo2):
+-------------------------------
+demo1-service & demo2-service:
+  environment:
+    - EUREKA_SERVER_HOST=${EUREKA_SERVER_HOST:-eureka-server}
+    - EUREKA_SERVER_PORT=${EUREKA_SERVER_PORT:-8761}
+    - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:-http://${EUREKA_SERVER_HOST:-eureka-server}:${EUREKA_SERVER_PORT:-8761}/eureka/}
+  depends_on:
+    - eureka-server
+
+5. NETWORKING CONFIGURATION
+===========================
+
+Network: spring-net (bridge driver)
+- All services communicate through this network
+- Eureka server and clients are on the same network
+- Service discovery works via hostnames within the Docker network
+
+6. SERVICE DISCOVERY FLOW
+=========================
+
+1. Eureka Server starts on port 8761
+2. Client services start and register with Eureka server
+3. Clients fetch registry information from Eureka server
+4. Services can discover each other using service names
+5. Heartbeat mechanism keeps services registered
+6. Automatic cleanup of expired instances
+
+7. CONFIGURATION EXPLANATIONS
+=============================
+
+Key Settings Explained:
+
+prefer-ip-address: true
+- Uses IP address instead of hostname for service registration
+- Essential for Docker containers to communicate properly
+- Avoids hostname resolution issues in containerized environments
+
+leaseRenewalIntervalInSeconds: 5
+- Client sends heartbeat every 5 seconds
+- Keeps the service registered with Eureka server
+- Shorter intervals for faster failure detection
+
+leaseExpirationDurationInSeconds: 10
+- Eureka server waits 10 seconds before removing expired instance
+- Should be at least 2x the renewal interval
+- Allows for network delays and temporary issues
+
+registryFetchIntervalSeconds: 5
+- Client fetches updated registry every 5 seconds
+- Keeps client aware of new/removed services
+- Enables dynamic service discovery
+
+enableSelfPreservation: false
+- Disabled for development environment
+- In production, should be enabled for better fault tolerance
+- Prevents Eureka from removing instances during network issues
+
+8. PRODUCTION CONSIDERATIONS
+============================
+
+For Production Deployment:
+
+1. Enable Self Preservation:
+   enableSelfPreservation: true
+
+2. Increase Timeouts:
+   leaseRenewalIntervalInSeconds: 30
+   leaseExpirationDurationInSeconds: 90
+
+3. Add Security:
+   - Enable authentication
+   - Use HTTPS
+   - Configure proper firewall rules
+
+4. High Availability:
+   - Deploy multiple Eureka server instances
+   - Configure peer-to-peer communication
+   - Use load balancers
+
+5. Monitoring:
+   - Enable Eureka metrics
+   - Monitor service registration/deregistration
+   - Set up alerts for service failures
+
+9. TROUBLESHOOTING
+==================
+
+Common Issues and Solutions:
+
+1. Service Not Registering:
+   - Check network connectivity
+   - Verify Eureka server URL
+   - Check hostname/IP configuration
+
+2. Service Discovery Not Working:
+   - Verify service names match
+   - Check Eureka server is running
+   - Review client configuration
+
+3. Connection Timeouts:
+   - Increase timeout values
+   - Check network latency
+   - Verify SSL configuration if using HTTPS
+
+4. Instance Expiring:
+   - Check heartbeat configuration
+   - Verify network stability
+   - Review lease expiration settings
+
+10. USEFUL ENDPOINTS
+====================
+
+Eureka Server Endpoints:
+- Dashboard: http://localhost:8761
+- Health Check: http://localhost:8761/actuator/health
+- Metrics: http://localhost:8761/actuator/metrics
+
+Service Endpoints:
+- Service Health: http://localhost:8081/actuator/health
+- Service Info: http://localhost:8081/actuator/info
+
+This configuration provides a robust service discovery mechanism for the microservices architecture. 
