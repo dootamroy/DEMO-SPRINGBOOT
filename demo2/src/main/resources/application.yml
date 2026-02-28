@@ -4,9 +4,9 @@ spring:
   application:
     name: demo2-service
   datasource:
-    url: ${DEMO2_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:100.75.215.139}:${DB_PORT:5432}/${DEMO2_DB_NAME:demo2_db}}
+    url: ${DEMO2_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DEMO2_DB_NAME:demo2_db}}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:ROCKETMAN123}
+    password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -14,35 +14,23 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-    properties:
-      ssl: true
-      sslmode: require
   jpa:
     database-platform: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}
     hibernate:
       ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
-    show-sql: ${SPRING_JPA_SHOW_SQL:true}
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:
       hibernate:
         format_sql: true
         dialect: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}
 
-# Supabase Datasource Configuration
+# Optional secondary datasource
 supabase:
   datasource:
-    url: ${DEMO2_SUPABASE_DATASOURCE_URL:jdbc:postgresql://${SUPABASE_DB_HOST:aws-0-ap-south-1.pooler.supabase.com}:${SUPABASE_DB_PORT:5432}/${SUPABASE_DB_NAME:postgres}}
-    username: ${SUPABASE_DB_USERNAME:postgres.yseolfesfpymybqrgmpn}
-    password: ${SUPABASE_DB_PASSWORD:Rocketman@123}
+    url: ${DEMO2_SUPABASE_DATASOURCE_URL:jdbc:postgresql://${SUPABASE_DB_HOST:localhost}:${SUPABASE_DB_PORT:5432}/${SUPABASE_DB_NAME:demo2_db}}
+    username: ${SUPABASE_DB_USERNAME:postgres}
+    password: ${SUPABASE_DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-    properties:
-      ssl: true
-      sslmode: require
 
 eureka:
   instance:
@@ -55,4 +43,4 @@ eureka:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://${EUREKA_SERVER_HOST:eureka-server}:${EUREKA_SERVER_PORT:8761}/eureka/}
     registryFetchIntervalSeconds: 5
     instanceInfoReplicationIntervalSeconds: 5
-    initialInstanceInfoReplicationIntervalSeconds: 5 
+    initialInstanceInfoReplicationIntervalSeconds: 5

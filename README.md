@@ -92,3 +92,25 @@ jdbc:postgresql://${DB_HOST}:${DB_PORT}/${SERVICE_DB_NAME}
 - Consider using Docker secrets or Kubernetes secrets for production deployments
 - Each service can connect to completely different database instances if needed
  
+
+
+## Quick Start (Local Docker)
+
+1. Copy environment variables:
+   ```bash
+   cp env.example .env
+   ```
+2. Start all services:
+   ```bash
+   docker compose up --build
+   ```
+3. Verify endpoints:
+   - Eureka: `http://localhost:8761`
+   - Demo1 users: `http://localhost:8081/api/users`
+   - Demo2 hello: `http://localhost:8082/hello`
+
+## Security Baseline
+
+- This repository now uses local-safe defaults in tracked config.
+- Do not commit real credentials to `env.example`, `.env`, `application.yml`, or `docker-compose.yml`.
+- Use secret management (for example Docker/Kubernetes secrets or CI secret stores) in shared environments.
