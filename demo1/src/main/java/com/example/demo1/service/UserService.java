@@ -2,6 +2,8 @@ package com.example.demo1.service;
 
 import com.example.demo1.entity.User;
 import com.example.demo1.repository.UserRepository;
+import com.example.demo1.exception.ConflictException;
+import com.example.demo1.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,7 +43,7 @@ public class UserService {
         if (user.isPresent()) {
             return user.get();
         } else {
-            throw new RuntimeException("User not found with ID: " + id);
+            throw new ResourceNotFoundException("User not found with ID: " + id);
         }
     }
 
@@ -54,7 +56,7 @@ public class UserService {
         
         // Check if email already exists
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("User with email " + user.getEmail() + " already exists");
+            throw new ConflictException("User with email " + user.getEmail() + " already exists");
         }
         
         return userRepository.save(user);
@@ -64,7 +66,7 @@ public class UserService {
     public User updateUser(User user) {
         // Check if user exists
         if (!userRepository.existsById(user.getId())) {
-            throw new RuntimeException("User not found with ID: " + user.getId());
+            throw new ResourceNotFoundException("User not found with ID: " + user.getId());
         }
         
         // Check if email is being changed and if it already exists
@@ -74,7 +76,7 @@ public class UserService {
             if (!currentUser.getEmail().equals(user.getEmail())) {
                 // Email is being changed, check if new email already exists
                 if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-                    throw new RuntimeException("User with email " + user.getEmail() + " already exists");
+                    throw new ConflictException("User with email " + user.getEmail() + " already exists");
                 }
             }
         }
@@ -85,7 +87,7 @@ public class UserService {
     @Transactional(transactionManager = "renderTransactionManager")
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found with ID: " + id);
+            throw new ResourceNotFoundException("User not found with ID: " + id);
         }
         userRepository.deleteById(id);
     }

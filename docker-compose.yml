@@ -1,7 +1,25 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: demo-postgres
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - spring-net
+
   eureka-server:
     image: eureka-server:latest
-    build: 
+    build:
       context: ./eureka-server
       dockerfile: Dockerfile
     ports:
@@ -14,7 +32,7 @@ services:
 
   demo1-service:
     image: demo1-service:latest
-    build: 
+    build:
       context: ./demo1
       dockerfile: Dockerfile
     ports:
@@ -22,42 +40,36 @@ services:
     volumes:
       - demo1_logs:/app/logs
     environment:
-      # Render Database Configuration
-      - DB_HOST=${DB_HOST:-100.75.215.139}
+      - DB_HOST=${DB_HOST:-postgres}
       - DB_PORT=${DB_PORT:-5432}
       - DEMO1_DB_NAME=${DEMO1_DB_NAME:-demo1_db}
       - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-ROCKETMAN123}
-      - DEMO1_DATASOURCE_URL=${DEMO1_DATASOURCE_URL:-jdbc:postgresql://${DB_HOST:-100.75.215.139}:${DB_PORT:-5432}/${DEMO1_DB_NAME:-demo1_db}}
-      
-      # Supabase Database Configuration
-      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST:-aws-0-ap-south-1.pooler.supabase.com}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DEMO1_DATASOURCE_URL=${DEMO1_DATASOURCE_URL:-jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DEMO1_DB_NAME:-demo1_db}}
+      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST:-postgres}
       - SUPABASE_DB_PORT=${SUPABASE_DB_PORT:-5432}
       - SUPABASE_DB_NAME=${SUPABASE_DB_NAME:-postgres}
-      - SUPABASE_DB_USERNAME=${SUPABASE_DB_USERNAME:-postgres.yseolfesfpymybqrgmpn}
-      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD:-Rocketman@123}
-      - DEMO1_SUPABASE_DATASOURCE_URL=${DEMO1_SUPABASE_DATASOURCE_URL:-jdbc:postgresql://${SUPABASE_DB_HOST:-aws-0-ap-south-1.pooler.supabase.com}:${SUPABASE_DB_PORT:-5432}/${SUPABASE_DB_NAME:-postgres}}
-      
-      # JPA Configuration
+      - SUPABASE_DB_USERNAME=${SUPABASE_DB_USERNAME:-postgres}
+      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD:-postgres}
+      - DEMO1_SUPABASE_DATASOURCE_URL=${DEMO1_SUPABASE_DATASOURCE_URL:-jdbc:postgresql://${SUPABASE_DB_HOST:-postgres}:${SUPABASE_DB_PORT:-5432}/${SUPABASE_DB_NAME:-postgres}}
       - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.PostgreSQLDialect}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO:-none}
-      - SPRING_JPA_SHOW_SQL=${SPRING_JPA_SHOW_SQL:-true}
-      
-      # Eureka Configuration
+      - SPRING_JPA_SHOW_SQL=${SPRING_JPA_SHOW_SQL:-false}
       - EUREKA_SERVER_HOST=${EUREKA_SERVER_HOST:-eureka-server}
       - EUREKA_SERVER_PORT=${EUREKA_SERVER_PORT:-8761}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:-http://${EUREKA_SERVER_HOST:-eureka-server}:${EUREKA_SERVER_PORT:-8761}/eureka/}
-      
-      # Service Configuration
       - DEMO1_SERVICE_PORT=${DEMO1_SERVICE_PORT:-8081}
     networks:
       - spring-net
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_started
+      postgres:
+        condition: service_healthy
 
   demo2-service:
     image: demo2-service:latest
-    build: 
+    build:
       context: ./demo2
       dockerfile: Dockerfile
     ports:
@@ -65,38 +77,32 @@ services:
     volumes:
       - demo2_logs:/app/logs
     environment:
-      # Render Database Configuration
-      - DB_HOST=${DB_HOST:-100.75.215.139}
+      - DB_HOST=${DB_HOST:-postgres}
       - DB_PORT=${DB_PORT:-5432}
       - DEMO2_DB_NAME=${DEMO2_DB_NAME:-demo2_db}
       - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-ROCKETMAN123}
-      - DEMO2_DATASOURCE_URL=${DEMO2_DATASOURCE_URL:-jdbc:postgresql://${DB_HOST:-100.75.215.139}:${DB_PORT:-5432}/${DEMO2_DB_NAME:-demo2_db}}
-      
-      # Supabase Database Configuration
-      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST:-aws-0-ap-south-1.pooler.supabase.com}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DEMO2_DATASOURCE_URL=${DEMO2_DATASOURCE_URL:-jdbc:postgresql://${DB_HOST:-postgres}:${DB_PORT:-5432}/${DEMO2_DB_NAME:-demo2_db}}
+      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST:-postgres}
       - SUPABASE_DB_PORT=${SUPABASE_DB_PORT:-5432}
       - SUPABASE_DB_NAME=${SUPABASE_DB_NAME:-postgres}
-      - SUPABASE_DB_USERNAME=${SUPABASE_DB_USERNAME:-postgres.yseolfesfpymybqrgmpn}
-      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD:-Rocketman@123}
-      - DEMO2_SUPABASE_DATASOURCE_URL=${DEMO2_SUPABASE_DATASOURCE_URL:-jdbc:postgresql://${SUPABASE_DB_HOST:-aws-0-ap-south-1.pooler.supabase.com}:${SUPABASE_DB_PORT:-5432}/${SUPABASE_DB_NAME:-postgres}}
-      
-      # JPA Configuration
+      - SUPABASE_DB_USERNAME=${SUPABASE_DB_USERNAME:-postgres}
+      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD:-postgres}
+      - DEMO2_SUPABASE_DATASOURCE_URL=${DEMO2_SUPABASE_DATASOURCE_URL:-jdbc:postgresql://${SUPABASE_DB_HOST:-postgres}:${SUPABASE_DB_PORT:-5432}/${SUPABASE_DB_NAME:-postgres}}
       - SPRING_JPA_DATABASE_PLATFORM=${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.PostgreSQLDialect}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO:-none}
-      - SPRING_JPA_SHOW_SQL=${SPRING_JPA_SHOW_SQL:-true}
-      
-      # Eureka Configuration
+      - SPRING_JPA_SHOW_SQL=${SPRING_JPA_SHOW_SQL:-false}
       - EUREKA_SERVER_HOST=${EUREKA_SERVER_HOST:-eureka-server}
       - EUREKA_SERVER_PORT=${EUREKA_SERVER_PORT:-8761}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:-http://${EUREKA_SERVER_HOST:-eureka-server}:${EUREKA_SERVER_PORT:-8761}/eureka/}
-      
-      # Service Configuration
       - DEMO2_SERVICE_PORT=${DEMO2_SERVICE_PORT:-8082}
     networks:
       - spring-net
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_started
+      postgres:
+        condition: service_healthy
 
 networks:
   spring-net:
@@ -105,3 +111,4 @@ networks:
 volumes:
   demo1_logs:
   demo2_logs:
+  postgres_data:

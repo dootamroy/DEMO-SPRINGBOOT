@@ -25,3 +25,11 @@ replay_pid*
 
 # Environment variables
 .env
+
+# Maven build output
+target/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
